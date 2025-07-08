@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 font-sans">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Income Tax Calculator 2024-2025 (Prepared By: Naveed Anwer, Senior Accountant, Sessions Courts, Vehari)</h1>
+
+        <div class="mb-4">
+            <label for="grossIncome" class="block text-gray-700 text-sm font-semibold mb-2">1. Total Annual Taxable Income (PKR)</label>
+            <input
+                type="number"
+                id="grossIncome"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter gross income"
+                min="0"
+                value="0"
+            >
+        </div>
+
+        <div class="mb-4">
+            <label for="exemptAllowance01Input" class="block text-gray-700 text-sm font-semibold mb-2">2. Annual Amount of Allowance-01 Exempt From Tax (PKR)</label>
+            <input
+                type="number"
+                id="exemptAllowance01Input"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter allowance 01"
+                min="0"
+                value="0"
+            >
+        </div>
+
+        <div class="mb-4">
+            <label for="exemptAllowance02Input" class="block text-gray-700 text-sm font-semibold mb-2">3. Annual Amount of Allowance-02 Exempt From Tax (PKR)(12 Monthes)</label>
+            <input
+                type="number"
+                id="exemptAllowance02Input"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter allowance 02"
+                min="0"
+                value="0"
+            >
+        </div>
+
+        <div class="mt-6 border-t pt-4">
+            <label class="block text-gray-800 text-lg font-bold mb-2">4. Total Annual Tax</label>
+            <div id="totalTax" class="bg-blue-500 text-white text-2xl font-extrabold p-3 rounded text-center">PKR 0</div>
+        </div>
+    </div>
+
+    <script>
+        // Get references to the input and display elements
+        const grossIncomeInput = document.getElementById('grossIncome');
+        const exemptAllowance01Input = document.getElementById('exemptAllowance01Input');
+        const exemptAllowance02Input = document.getElementById('exemptAllowance02Input');
+        const totalTaxDiv = document.getElementById('totalTax');
+
+        /**
+         * Formats a number as Pakistani Rupee currency.
+         * @param {number} amount - The amount to format.
+         * @returns {string} The formatted currency string.
+         */
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-PK', {
+                style: 'currency',
+                currency: 'PKR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        };
+
+        /**
+         * Calculates the income tax based on the provided tax slabs.
+         * The input 'income' here is assumed to be the *taxable income* after deductions.
+         * @param {number} income - The taxable income after deductions.
+         * @returns {number} The calculated tax amount.
+         */
+        const calculateTax = (income) => {
+            let tax = 0;
+
+            // Ensure income is not negative before applying slabs
+            const effectiveIncome = Math.max(0, income);
+
+            if (effectiveIncome <= 600000) {
+                tax = 0;
+            } else if (effectiveIncome <= 1200000) {
+                tax = 0.05 * (effectiveIncome - 600000);
+            } else if (effectiveIncome <= 2200000) {
+                tax = 30000 + 0.15 * (effectiveIncome - 1200000);
+            } else if (effectiveIncome <= 3200000) {
+                tax = 180000 + 0.25 * (effectiveIncome - 2200000);
+            } else if (effectiveIncome <= 4100000) {
+                tax = 430000 + 0.30 * (effectiveIncome - 3200000);
+            } else { // effectiveIncome exceeds 4,100,000
+                tax = 700000 + 0.35 * (effectiveIncome - 4100000);
+            }
+
+            return Math.max(0, tax); // Ensure tax is not negative
+        };
+
+        /**
+         * Updates all calculations based on current input values.
+         * This function is called whenever any relevant input field changes.
+         */
+        const updateCalculations = () => {
+            const grossIncome = parseFloat(grossIncomeInput.value) || 0;
+            const allowance01 = parseFloat(exemptAllowance01Input.value) || 0;
+            const allowance02 = parseFloat(exemptAllowance02Input.value) || 0;
+
+            // Calculate the net taxable income by subtracting allowances from gross income
+            const netTaxableIncome = grossIncome - allowance01 - allowance02;
+
+            // Calculate the tax based on the net taxable income
+            const calculatedTax = calculateTax(netTaxableIncome);
+
+            // Update the display for total tax
+            totalTaxDiv.textContent = formatCurrency(calculatedTax);
+        };
+
+        // Add event listeners to all input fields to trigger recalculation on change
+        grossIncomeInput.addEventListener('input', updateCalculations);
+        exemptAllowance01Input.addEventListener('input', updateCalculations);
+        exemptAllowance02Input.addEventListener('input', updateCalculations);
+
+        // Perform initial calculation when the page loads
+        updateCalculations();
+    </script>
+</body>
+</html>
